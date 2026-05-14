@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WhisperMe — Plan Hub</title>
+<style>
+  :root {
+    --bg: #fbfbfa;
+    --bg-soft: #f3f2ee;
+    --text: #1c1c1c;
+    --text-soft: #555;
+    --text-mute: #8a8a8a;
+    --heading: #0a0a0a;
+    --border: #d8d4c8;
+    --border-soft: #e8e5dc;
+    --accent: #2c4a3e;
+    --done: #1a6643;
+    --active: #8a5a00;
+    --dropped: #6a6a6a;
+    --warn: #7a2a2a;
+    --code-bg: #f5f3ec;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: ui-sans-serif, -apple-system, "SF Pro Text", "Inter", system-ui, "Helvetica Neue", sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  main {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 56px 32px 120px;
+  }
+  header.page-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 28px;
+    margin-bottom: 32px;
+  }
+  header.page-header h1 {
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--heading);
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+  header.page-header .sub {
+    color: var(--text-soft);
+    font-size: 14px;
+    margin: 0;
+  }
+  header.page-header .meta {
+    margin-top: 14px;
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    font-size: 12px;
+    color: var(--text-mute);
+  }
+  nav.toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    font-size: 13px;
+    margin: 18px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  nav.toc a {
+    color: var(--text-soft);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+  }
+  nav.toc a:hover { color: var(--text); border-bottom-color: var(--text-soft); }
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--heading);
+    margin: 56px 0 16px;
+    letter-spacing: -0.005em;
+    border-bottom: 1px solid var(--border-soft);
+    padding-bottom: 8px;
+  }
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--heading);
+    margin: 28px 0 10px;
+  }
+  h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--heading);
+    margin: 18px 0 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  p { margin: 0 0 12px; }
+  a { color: var(--accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:hover { color: var(--text); }
+  code, pre {
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  p code, li code, td code {
+    background: var(--code-bg);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 12.5px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 18px;
+    font-size: 14px;
+  }
+  th, td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border-soft);
+    vertical-align: top;
+  }
+  th {
+    font-weight: 600;
+    color: var(--heading);
+    background: var(--bg-soft);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  ul { margin: 0 0 14px; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .check-list { list-style: none; padding-left: 0; }
+  .check-list li {
+    padding: 4px 0;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .check-list li .box {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 14px;
+    line-height: 1.4;
+    width: 18px;
+    flex-shrink: 0;
+    color: var(--text-mute);
+  }
+  .check-list li.done .box { color: var(--done); }
+  .check-list li.active .box { color: var(--active); }
+  .check-list li.dropped .box { color: var(--dropped); }
+  .check-list li.dropped .label { text-decoration: line-through; color: var(--text-mute); }
+  .check-list li.active .label { font-weight: 500; }
+  .check-list li .note {
+    color: var(--text-soft);
+    font-size: 13px;
+    margin-left: 6px;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-left: 8px;
+    vertical-align: middle;
+    border: 1px solid;
+  }
+  .badge.done { color: var(--done); border-color: var(--done); background: rgba(26, 102, 67, 0.06); }
+  .badge.active { color: var(--active); border-color: var(--active); background: rgba(138, 90, 0, 0.06); }
+  .badge.dropped { color: var(--dropped); border-color: var(--dropped); background: rgba(106, 106, 106, 0.06); }
+  .badge.warn { color: var(--warn); border-color: var(--warn); background: rgba(122, 42, 42, 0.06); }
+  .phase {
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin: 14px 0;
+    background: #fff;
+  }
+  .phase.done { background: #fafaf6; }
+  .phase.dropped { opacity: 0.7; }
+  .phase header {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .phase header h3 { margin: 0; }
+  .phase .summary { color: var(--text-soft); font-size: 14px; margin: 0 0 12px; }
+  .decision {
+    border-left: 3px solid var(--border);
+    padding: 6px 0 6px 16px;
+    margin: 14px 0;
+    font-size: 14px;
+  }
+  .decision .head {
+    font-weight: 600;
+    color: var(--heading);
+    display: block;
+    margin-bottom: 3px;
+  }
+  .decision .rev {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 11px;
+    color: var(--text-mute);
+    margin-left: 6px;
+  }
+  .decision.committed { border-left-color: var(--done); }
+  .decision.reversed { border-left-color: var(--warn); }
+  .decision .body { color: var(--text-soft); }
+  .legend {
+    font-size: 12px;
+    color: var(--text-mute);
+    margin: 16px 0 8px;
+    font-family: ui-monospace, Menlo, monospace;
+  }
+  .legend span { margin-right: 18px; }
+  .legend .lg-done { color: var(--done); }
+  .legend .lg-active { color: var(--active); }
+  .legend .lg-dropped { color: var(--dropped); }
+  .rule {
+    margin: 6px 0;
+    padding: 8px 12px;
+    border-left: 2px solid var(--border);
+    background: var(--bg-soft);
+    border-radius: 0 4px 4px 0;
+    font-size: 14px;
+  }
+  .rule .id {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 12px;
+    color: var(--text-mute);
+    margin-right: 8px;
+    font-weight: 600;
+  }
+  .lesson {
+    margin: 4px 0;
+    font-size: 13.5px;
+  }
+  .lesson .id {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 600;
+    margin-right: 6px;
+  }
+  details {
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
+    padding: 6px 12px;
+    margin: 8px 0;
+    background: #fff;
+  }
+  details summary {
+    cursor: pointer;
+    font-weight: 500;
+    padding: 4px 0;
+    color: var(--heading);
+  }
+  details[open] summary { border-bottom: 1px solid var(--border-soft); margin-bottom: 8px; }
+  .gap-row {
+    display: flex;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px dotted var(--border-soft);
+    font-size: 14px;
+  }
+  .gap-row:last-child { border-bottom: none; }
+  .gap-row .kind {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 11px;
+    color: var(--warn);
+    width: 100px;
+    flex-shrink: 0;
+    padding-top: 1px;
+  }
+  hr.divider {
+    border: none;
+    border-top: 1px solid var(--border-soft);
+    margin: 36px 0;
+  }
+  footer {
+    margin-top: 80px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--text-mute);
+    font-size: 12px;
+    font-family: ui-monospace, Menlo, monospace;
+  }
+  @media (max-width: 640px) {
+    main { padding: 32px 18px 80px; }
+    header.page-header h1 { font-size: 24px; }
+    h2 { font-size: 18px; }
+    .phase { padding: 14px 16px; }
+    pre { font-size: 12px; padding: 12px; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+<header class="page-header">
+  <h1>WhisperMe — Plan Hub</h1>
+  <p class="sub">Clinical Hebrew Speech-Language-Pathology product. Single source of truth for architecture, decisions, phases, rules, and findings.</p>
+  <p class="meta">Revision 1 &middot; Architecture v4.0 (post-SLAM pivot) &middot; STT layer committed: Soniox EU</p>
+  <nav class="toc">
+    <a href="#status">Status</a>
+    <a href="#decisions">Decisions</a>
+    <a href="#phases">Phases</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#rules">Rules &amp; Lessons</a>
+    <a href="#findings">Findings library</a>
+    <a href="#open-gaps">Open gaps</a>
+  </nav>
+</header>
+
+<!-- =================== STATUS =================== -->
+<section id="status">
+  <h2>Status</h2>
+  <table>
+    <tr><th>Project goal</th><td>AAA-quality clinical Hebrew SLP product. Trust Mode UI + clinical SLP analysis + Israeli compliance. Ship when perfect.</td></tr>
+    <tr><th>STT layer (L0)</th><td>Soniox <code>stt-rt-v4</code> / <code>stt-async-v4</code> via <code>api.eu.soniox.com</code> &mdash; 7.5% Hebrew WER on vendor benchmark; empirically validated on 3 colloquial samples</td></tr>
+    <tr><th>Architecture revision</th><td>v4.0 (replaces v3.0 SLAM-LLM-from-scratch plan)</td></tr>
+    <tr><th>Active phase</th><td>Phase 2 &mdash; Soniox integration + working prototype</td></tr>
+    <tr><th>Deployment target</th><td>AWS il-central-1 (Tel Aviv) primary; DR to eu-central-1 with Amendment 13 cross-border docs</td></tr>
+    <tr><th>Compliance regime</th><td>Israeli PPL Amendment 13 (effective 14 Aug 2025) &middot; AMAR/AMIR SaMD pathway &middot; ISO 13485 + IEC 62304 Class B</td></tr>
+    <tr><th>Realistic WER target</th><td>5&ndash;9% Hebrew (Soniox baseline 7.5% + uncertain L4 correction). 3&ndash;4% not reachable today with any open Hebrew ASR.</td></tr>
+  </table>
+</section>
+
+<!-- =================== DECISIONS LOG =================== -->
+<section id="decisions">
+  <h2>Decisions log</h2>
+  <p>Top-level architectural commitments. Each is either active or reversed &mdash; never "deferred" or "maybe."</p>
+
+  <div class="decision committed">
+    <span class="head">STT = Soniox EU<span class="rev">rev 1</span></span>
+    <span class="body">Committed after direct empirical Hebrew test (3 colloquial samples, near-perfect vs ElevenLabs Scribe v1 catastrophic). Verified HIPAA + SOC 2 Type 2 + ISO 27001 + GDPR + zero retention. EU = Israeli PPL adequacy (Amendment 13). DPA pre-signed, one-click countersign in Console. No sales call needed.</span>
+  </div>
+
+  <div class="decision committed">
+    <span class="head">Architecture v4.0 stack: Soniox L0 &rarr; L4 narrow correction &rarr; Trust Mode UI &rarr; Clinical SLP layer &rarr; Compliance/audit<span class="rev">rev 1</span></span>
+    <span class="body">L4 measured-before-locked (no Hebrew empirical evidence narrow LLM correction beats 7.5% baseline). Trust Mode = Abridge Linked Evidence pattern, NOT confidence heatmap (CHI '25 study showed heatmaps don't help).</span>
+  </div>
+
+  <div class="decision reversed">
+    <span class="head">SLAM-LLM linear projector from-scratch ASR<span class="rev">abandoned</span></span>
+    <span class="body">Trained 9k/10k steps with LoRA r=32 on 50k Hebrew samples. Audio-routing probe: model produces same Hebrew loop for 4 of 5 different audios. WER 614% on FLEURS he_il. Architecture inadequate for non-English at this data scale. Trained <code>model.pt</code> kept locally as historical artifact only.</span>
+  </div>
+
+  <div class="decision reversed">
+    <span class="head">L4 text-only correction (KenLM, DictaLM rescoring)<span class="rev">abandoned</span></span>
+    <span class="body">KenLM 5-gram shallow fusion regressed on noisy Hebrew. DictaLM-1.7B perplexity rescoring flat. Text-only rescoring of Hebrew N-best = dead. (Note: narrow audio-aware correction of low-conf spans is a different problem, still on the table pending L4 measurement.)</span>
+  </div>
+
+  <div class="decision reversed">
+    <span class="head">"Israel residency required" framing<span class="rev">corrected</span></span>
+    <span class="body">PPL Amendment 13 does NOT require physical residency in Israel. It requires one of: adequate destination (EU qualifies), DPA with PPL-aligned clauses, or data subject consent. Soniox EU + DPA + consent satisfies the law. Reversed earlier overcautious framing.</span>
+  </div>
+
+  <div class="decision reversed">
+    <span class="head">"Use ElevenLabs Scribe because 3.1% Hebrew WER"<span class="rev">corrected</span></span>
+    <span class="body">3.1% number was fabricated through search-result misattribution and recycled across responses (§7e violation). ElevenLabs' own Hebrew page states 15.2% on FLEURS Hebrew. Reversed in favor of Soniox after direct empirical comparison.</span>
+  </div>
+</section>
+
+<!-- =================== PHASES =================== -->
+<section id="phases">
+  <h2>Phases</h2>
+  <div class="legend">
+    <span>☐ pending</span>
+    <span class="lg-active">◐ active</span>
+    <span class="lg-done">☑ done</span>
+    <span class="lg-dropped">☒ dropped</span>
+  </div>
+
+  <!-- Phase 0 -->
+  <div class="phase done">
+    <header>
+      <h3>Phase 0 &mdash; SLAM-LLM Hebrew smoke</h3>
+      <span class="badge done">done &middot; abandoned outcome</span>
+    </header>
+    <p class="summary">1,000 Hebrew samples, projector-only training, 1 epoch, freeze LLM. Outcome: eval_acc 0.34 under teacher forcing. Free-run inference produced &quot;100.100&hellip;&quot; digit loops. Concluded scale too small to draw conclusion; Phase 1 scaled up.</p>
+    <ul class="check-list">
+      <li class="done"><span class="box">☑</span><span class="label">Data prep: <code>scripts/slam/prepare_hebrew_data.py</code></span></li>
+      <li class="done"><span class="box">☑</span><span class="label">Training recipe: <code>scripts/slam/train_slam_hebrew.sh</code></span></li>
+      <li class="done"><span class="box">☑</span><span class="label">Vast bootstrap: <code>scripts/cloud/vast_slam_llm_setup.sh</code></span></li>
+      <li class="done"><span class="box">☑</span><span class="label">Checkpoints saved locally: <code>output/slam_phase0_checkpoints/&hellip;step_200/model.pt</code>, <code>step_400/model.pt</code></span></li>
+    </ul>
+  </div>
+
+  <!-- Phase 1 -->
+  <div class="phase done">
+    <header>
+      <h3>Phase 1 &mdash; SLAM-LLM Hebrew full + LoRA</h3>
+      <span class="badge dropped">done &middot; architecture abandoned</span>
+    </header>
+    <p class="summary">9,000/10,000 steps on 50k Hebrew samples. Projector + LoRA r=32 on q_proj/v_proj across all 28 DictaLM-1.7B layers. eval_acc 0.38 under teacher forcing. <strong>Free-run WER 614% on FLEURS he_il.</strong> Audio-routing probe: 4 of 5 different Hebrew audios produced identical hypothesis. Linear projector is inadequate bridge for non-English at this data scale (matches VOX-KRIKRI Greek paper motivation).</p>
+    <ul class="check-list">
+      <li class="done"><span class="box">☑</span><span class="label">Trained Phase 1 to step 9000</span></li>
+      <li class="done"><span class="box">☑</span><span class="label">Pulled <code>step_9000/model.pt</code> + earlier checkpoints back from Vast</span></li>
+      <li class="done"><span class="box">☑</span><span class="label">Free-run WER eval on FLEURS he_il (n=20 smoke) &rarr; <code>output/slam_phase1_eval_results/smoke_n20_v2.json</code></span></li>
+      <li class="done"><span class="box">☑</span><span class="label">Whisper-large-v3 baseline n=200 &rarr; <code>output/slam_phase1_eval_results/baseline_n200.json</code> (WER 32.12%, CER 12.19%)</span></li>
+      <li class="done"><span class="box">☑</span><span class="label">Audio-routing probe: <code>scripts/slam/probe_audio_routing.py</code> (confirmed audio is ignored)</span></li>
+      <li class="done"><span class="box">☑</span><span class="label">Corrected eval script: <code>scripts/slam/eval_wer_fleurs.py</code> (loads LoRA properly + uses real SLAM-LLM prompt template)</span></li>
+      <li class="done"><span class="box">☑</span><span class="label">All Vast resources destroyed (no recurring billing)</span></li>
+    </ul>
+  </div>
+
+  <!-- Phase 2 -->
+  <div class="phase">
+    <header>
+      <h3>Phase 2 &mdash; Soniox L0 integration + Trust Mode prototype</h3>
+      <span class="badge active">active</span>
+    </header>
+    <p class="summary">Replace SLAM-from-scratch with Soniox API as STT foundation. Build minimal working prototype: record &rarr; Soniox stream &rarr; Linked Evidence transcript UI with prefix-lock streaming. No L4 correction layer yet.</p>
+    <ul class="check-list">
+      <li><span class="box">☐</span><span class="label">Soniox Console signup + API key issued</span></li>
+      <li><span class="box">☐</span><span class="label">EU project region toggled in Console (<code>api.eu.soniox.com</code>)</span></li>
+      <li><span class="box">☐</span><span class="label">DPA countersigned (one-click in Console)</span></li>
+      <li><span class="box">☐</span><span class="label">BAA reviewed (Console &rarr; Security &amp; Compliance)</span></li>
+      <li><span class="box">☐</span><span class="label">Hebrew streaming integration: WebSocket client with <code>language_hints=["he","en"]</code>, <code>enable_speaker_diarization=true</code></span></li>
+      <li><span class="box">☐</span><span class="label">Clinical Hebrew hotword list (~500 terms) assembled and pushed to Soniox <code>context</code> field</span></li>
+      <li><span class="box">☐</span><span class="label">Linked Evidence transcript renderer (click word &rarr; audio seeks)</span></li>
+      <li><span class="box">☐</span><span class="label">Prefix-lock streaming UX: finalized solid + editable, tentative 60% opacity + read-only</span></li>
+      <li><span class="box">☐</span><span class="label">RTL transcript layout with LTR audio controls (bidi isolates around English/numbers)</span></li>
+      <li><span class="box">☐</span><span class="label">Hebrew Double-Metaphone "did you mean" suggestion library</span></li>
+    </ul>
+  </div>
+
+  <!-- Phase 3 -->
+  <div class="phase">
+    <header>
+      <h3>Phase 3 &mdash; Clinical SLP layer + corpus</h3>
+      <span class="badge">queued</span>
+    </header>
+    <p class="summary">The actual moat. Acoustic + lexical clinical features on top of the transcript. Hebrew aphasia corpus collection (AphasiaBank has zero Hebrew &mdash; we build it). TAU / Friedmann lab academic anchor. Hospital pilot scaffolding.</p>
+    <ul class="check-list">
+      <li><span class="box">☐</span><span class="label">Outreach to Prof. Naama Friedmann (TAU Language &amp; Brain Lab) for partnership scoping</span></li>
+      <li><span class="box">☐</span><span class="label">Hebrew aphasia corpus collection plan to AphasiaBank protocol (Cinderella retell + 4 picture descriptions + 1 procedural, CHAT transcription)</span></li>
+      <li><span class="box">☐</span><span class="label">Map validated Hebrew scales: WAB-Hebrew (Kasher 1999), FDA-2 Hebrew (Icht 2022), Friedmann-lab batteries (BAFLA / FriGvi / SHEMESH / HIFIL)</span></li>
+      <li><span class="box">☐</span><span class="label">Loewenstein Rehab SLP department contact (via TAU channel; department head not publicly verified)</span></li>
+      <li><span class="box">☐</span><span class="label">Sheba / Hadassah / Rambam / Rabin SLP department contact (department heads not publicly verified)</span></li>
+      <li><span class="box">☐</span><span class="label">Helsinki Committee protocol drafting (institutional level, MoH form 11)</span></li>
+      <li><span class="box">☐</span><span class="label">Clinical SLP features &mdash; acoustic: jitter, shimmer, F0 trajectory, formants, articulation rate</span></li>
+      <li><span class="box">☐</span><span class="label">Clinical SLP features &mdash; lexical: filler ratio, anomia gaps, paraphasia markers, code-switching rate</span></li>
+      <li><span class="box">☐</span><span class="label">Session-over-session diff per patient</span></li>
+    </ul>
+  </div>
+
+  <!-- Phase 4 -->
+  <div class="phase">
+    <header>
+      <h3>Phase 4 &mdash; L4 narrow correction (only if measurement justifies)</h3>
+      <span class="badge">queued &middot; measurement-gated</span>
+    </header>
+    <p class="summary">Punctuation + abbreviation expansion + NER-guarded LLM rewrite on Soniox-flagged low-confidence spans. <strong>Zero published Hebrew evidence this helps</strong> &mdash; mandatory empirical measurement before locking in.</p>
+    <ul class="check-list">
+      <li><span class="box">☐</span><span class="label">Held-out Hebrew clinical eval set (held back from Phase 3 corpus)</span></li>
+      <li><span class="box">☐</span><span class="label">AlephBERT-punctuation baseline measurement on Hebrew "?" / "." / ","</span></li>
+      <li><span class="box">☐</span><span class="label">Hebrew abbreviation expansion rules engine (gershayim heuristic + curated dict)</span></li>
+      <li><span class="box">☐</span><span class="label">DictaBERT-NER entity-guard layer (never "correct" recognized entities)</span></li>
+      <li><span class="box">☐</span><span class="label">DictaLM-3.0-1.7B-Instruct on SageMaker A10G via vLLM (in-region il-central-1)</span></li>
+      <li><span class="box">☐</span><span class="label">Confidence-threshold trigger calibrated on held-out Hebrew set (Soniox conf is NOT calibrated &mdash; measure)</span></li>
+      <li><span class="box">☐</span><span class="label">Claude Sonnet fallback for hard spans (<5%) gated by confidence</span></li>
+      <li><span class="box">☐</span><span class="label">Decision gate: span-level edit precision &gt; harm rate &rarr; ship L4; else ship without</span></li>
+    </ul>
+  </div>
+
+  <!-- Phase 5 -->
+  <div class="phase">
+    <header>
+      <h3>Phase 5 &mdash; Compliance + production deployment</h3>
+      <span class="badge">queued</span>
+    </header>
+    <p class="summary">PPL Amendment 13 obligations + Israeli MDR (AMAR/AMIR) + hospital procurement readiness. Most items here are external (lawyer, IRB, pen-test, certification body).</p>
+    <ul class="check-list">
+      <li><span class="box">☐</span><span class="label">DPO appointed (external contractor allowed; cannot be CEO/CTO/IT-Manager)</span></li>
+      <li><span class="box">☐</span><span class="label">DPIA drafted (clinical AI = automatic trigger)</span></li>
+      <li><span class="box">☐</span><span class="label">Database Definition Document drafted (purposes, categories, recipients, retention, security level=HIGH)</span></li>
+      <li><span class="box">☐</span><span class="label">Patient consent flow in Hebrew (granular: data categories, recipients, Soniox EU cross-border, retention, rights, withdrawal)</span></li>
+      <li><span class="box">☐</span><span class="label">AWS il-central-1 baseline (3 EC2 + RDS Postgres Multi-AZ + S3 + KMS + Cognito + Secrets Manager + CloudWatch)</span></li>
+      <li><span class="box">☐</span><span class="label">Encryption at rest + in transit verified</span></li>
+      <li><span class="box">☐</span><span class="label">Access log retention configured ≥24 months (PPL Reg. 10)</span></li>
+      <li><span class="box">☐</span><span class="label">Pen-test scheduled with Sygnia or Comsec (every 18 months for high-security DBs)</span></li>
+      <li><span class="box">☐</span><span class="label">Breach notification playbook (PPA &le;24h target, 72h ceiling)</span></li>
+      <li><span class="box">☐</span><span class="label">SaMD intended-use statement reviewed by lawyer (decision support vs diagnostic)</span></li>
+      <li><span class="box">☐</span><span class="label">Reference-country strategy: FDA 510(k) vs CE MDR (lawyer + reg-affairs consultant)</span></li>
+      <li><span class="box">☐</span><span class="label">CE notified body engagement (BSI / TÜV SÜD) for IEC 62304 Class B</span></li>
+      <li><span class="box">☐</span><span class="label">Israeli Registration Holder (IRH) appointed with local ISO 9001</span></li>
+      <li><span class="box">☐</span><span class="label">AMAR/AMIR registration filing</span></li>
+      <li><span class="box">☐</span><span class="label">Product liability + professional indemnity insurance ($1-5M typical)</span></li>
+      <li><span class="box">☐</span><span class="label">ISO 27001 certification (hospital procurement prerequisite)</span></li>
+      <li><span class="box">☐</span><span class="label">SOC 2 Type II report (hospital procurement prerequisite)</span></li>
+      <li><span class="box">☐</span><span class="label">IIA AI-in-Health Sandbox application (combined grants + regulatory relief)</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- =================== ARCHITECTURE =================== -->
+<section id="architecture">
+  <h2>Architecture v4.0</h2>
+  <p>Layer-by-layer view of the committed stack. Empirical gaps are explicit; nothing here is assumed to work without measurement.</p>
+
+<pre>
+&#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;
+&#9474;  Patient / Clinician device (Hebrew SLP session)                    &#9474;
+&#9474;  Mic audio in, diarized: clinician + patient + others                &#9474;
+&#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;
+                              &#8595; 16kHz/16-bit PCM, WebSocket or batch
+&#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;
+&#9474;  L0  STT  &mdash;  Soniox stt-rt-v4 / stt-async-v4                       &#9474;
+&#9474;  Endpoint: wss://stt-rt.soniox.com (RT) or api.eu.soniox.com (async)&#9474;
+&#9474;  Config:   language_hints=["he","en"]   diarize=true   context=&#123;...&#125; &#9474;
+&#9474;  Returns:  tokens[&#123;text, start_ms, end_ms, confidence, speaker&#125;]    &#9474;
+&#9474;  Limits:   300 min/file async, 10 concurrent ws, 8K context tokens   &#9474;
+&#9474;  Pricing:  $0.10/hr async, $0.12/hr streaming                        &#9474;
+&#9474;  Gaps:     N-best NOT exposed, confidence NOT calibrated for Hebrew  &#9474;
+&#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;
+                              &#8595; transcript + word confidences + speaker tags
+&#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;
+&#9474;  L4  Narrow Hebrew post-processing                                  &#9474;
+&#9474;  Trigger:  spans where mean(confidence) &lt; threshold (start 0.85)     &#9474;
+&#9474;  Pipeline (cheap&rarr;expensive, short-circuit):                          &#9474;
+&#9474;    4a. AlephBERT-punct restorer adds ? . , !                         &#9474;
+&#9474;    4b. Abbreviation expander (gershayim rules + dict)                &#9474;
+&#9474;    4c. DictaBERT-NER guards recognized entities                      &#9474;
+&#9474;    4d. DictaLM-3.0-1.7B-Instruct fp16 on SageMaker A10G via vLLM      &#9474;
+&#9474;    4e. Claude Sonnet fallback for hard spans (&lt;5%)                   &#9474;
+&#9474;  GAP: zero Hebrew empirical evidence this helps &mdash; measure first     &#9474;
+&#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;
+                              &#8595; corrected transcript + per-span provenance
+&#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;
+&#9474;  L1  Trust Mode UI  &mdash;  Abridge Linked Evidence pattern             &#9474;
+&#9474;  &middot; Transcript dir="rtl", audio controls LTR, bidi isolates         &#9474;
+&#9474;  &middot; Click any word &rarr; audio seeks + plays 2s pre-roll              &#9474;
+&#9474;  &middot; Streaming: prefix-lock (finalized solid + editable;             &#9474;
+&#9474;    tentative 60% opacity + READ-ONLY)                                &#9474;
+&#9474;  &middot; Low-conf cue: muted dotted underline, NOT color heatmap          &#9474;
+&#9474;    (CHI '25: heatmaps don't help)                                    &#9474;
+&#9474;  &middot; Double-tap word &rarr; bottom sheet: play / phonetic neighbors      &#9474;
+&#9474;    (Hebrew Double-Metaphone) / LLM rewrite / free edit               &#9474;
+&#9474;  &middot; Annotation: Hypothesis-style range &rarr; clinical color highlight  &#9474;
+&#9474;  &middot; Edit-capture loop (opt-in default-off, PHI scrubbed)             &#9474;
+&#9474;  &middot; WCAG AAA (7:1 contrast, never color-alone for confidence)        &#9474;
+&#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;
+                              &#8595; confirmed transcript + word IDs
+&#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;
+&#9474;  L2  Clinical SLP analysis  &mdash; the moat                             &#9474;
+&#9474;  &middot; Acoustic: jitter, shimmer, F0 trajectory, formants, rate        &#9474;
+&#9474;  &middot; Lexical: filler ratio, anomia gaps, paraphasia, code-switch     &#9474;
+&#9474;  &middot; Session-over-session diff per patient                           &#9474;
+&#9474;  &middot; Hebrew scales: WAB-He, FDA-2-He, Friedmann batteries            &#9474;
+&#9474;  &middot; AphasiaBank-protocol corpus (Hebrew &mdash; we build it)             &#9474;
+&#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;
+                              &#8595;
+&#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;
+&#9474;  L3  Compliance + audit (PPL Amendment 13 + AMAR SaMD)              &#9474;
+&#9474;  &middot; DPO (external contractor allowed; not CEO/CTO/IT-Manager)        &#9474;
+&#9474;  &middot; DPIA + Database Definition Document (HIGH security)              &#9474;
+&#9474;  &middot; Patient consent (Hebrew, granular, withdrawal mechanism)         &#9474;
+&#9474;  &middot; Encryption rest+transit, access logs &ge;24mo retention            &#9474;
+&#9474;  &middot; Pen-test every 18mo (Sygnia / Comsec)                            &#9474;
+&#9474;  &middot; Breach notification 24h/72h to PPA                               &#9474;
+&#9474;  &middot; SaMD AMAR/AMIR (Class II/IIa, via FDA 510(k) or CE MDR)           &#9474;
+&#9474;  &middot; ISO 13485 + IEC 62304 Class B                                    &#9474;
+&#9474;  &middot; Israeli Registration Holder (IRH) with local ISO 9001            &#9474;
+&#9474;  &middot; Product liability + professional indemnity $1-5M                 &#9474;
+&#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;
+</pre>
+
+  <h3>Deployment infrastructure</h3>
+  <table>
+    <tr><th>Role</th><th>Service</th><th>HIPAA-eligible</th><th>il-central-1 GA</th></tr>
+    <tr><td>API workloads</td><td>EC2 / ECS / EKS</td><td>yes</td><td>yes</td></tr>
+    <tr><td>Transcripts, patient/session metadata, audit log</td><td>RDS Postgres Multi-AZ</td><td>yes</td><td>yes</td></tr>
+    <tr><td>Audio storage (encrypted, IL-only)</td><td>S3 Standard</td><td>yes</td><td>yes</td></tr>
+    <tr><td>Encryption keys, Soniox API key</td><td>KMS + Secrets Manager</td><td>yes</td><td>yes</td></tr>
+    <tr><td>Clinician auth (MFA enforced)</td><td>Cognito</td><td>yes</td><td>yes</td></tr>
+    <tr><td>Webhook processing, async pipelines</td><td>Lambda</td><td>yes</td><td>yes</td></tr>
+    <tr><td>Audit logs (24mo retention)</td><td>CloudWatch + CloudTrail</td><td>yes</td><td>yes</td></tr>
+    <tr><td>DictaLM-1.7B inference (in-region)</td><td>SageMaker</td><td>yes</td><td>yes</td></tr>
+    <tr><td>Claude inference</td><td>Bedrock (cross-region only)</td><td>yes</td><td>partial &mdash; routes out of Israel</td></tr>
+  </table>
+
+  <p><strong>Network/cost reality:</strong> Tel Aviv ↔ Soniox EU (Frankfurt) is ~50&ndash;70ms RTT. Egress out of Israel is ~4× costlier than us-east-1. At 12,000 audio-hr/month, egress to Soniox dominates at ~$960/mo &mdash; total infra estimate $1,600&ndash;1,900/mo unrun (use AWS Calculator before commit).</p>
+
+  <p><strong>DR:</strong> no in-country secondary region exists for any hyperscaler in Israel. Options: (a) multi-AZ + snapshots within il-central-1, or (b) cross-region to eu-central-1 with explicit Amendment 13 transfer docs.</p>
+
+  <p><strong>Pen-test partners:</strong> Sygnia or Comsec (Israeli firms with healthcare experience). Cymotive is automotive-only &mdash; skip.</p>
+</section>
+
+<!-- =================== RULES & LESSONS =================== -->
+<section id="rules">
+  <h2>Rules &amp; Lessons</h2>
+
+  <h3>Conversational / process rules (user-set)</h3>
+  <div class="rule"><span class="id">R33</span>No time estimates from me ("week," "month," "soon," etc.). External calendar facts mentioned neutrally once if material to a decision &mdash; never as urgency or plan anchor.</div>
+  <div class="rule"><span class="id">R39</span>No multi-option drift. Commit to one path, defend or reverse on evidence &mdash; never list 3 options and ask the user to choose.</div>
+  <div class="rule"><span class="id">R-hand</span>No handoffs / wrap-ups unless explicitly asked.</div>
+  <div class="rule"><span class="id">R-AAA</span>AAA quality. Ship-when-perfect. Cut speculation, not ambition. Don't drift to minimal-first under skeptical pressure.</div>
+  <div class="rule"><span class="id">R-truth</span>Brutal honesty even when the truth is brutal. Don't sell "we learned from it" when work is genuinely wasted.</div>
+  <div class="rule"><span class="id">R-brain</span>Apply judgment before asking. Don't ask the user to disambiguate things I can resolve myself.</div>
+  <div class="rule"><span class="id">R-self-serve</span>Self-serve APIs do not need "sales calls." Read the docs before inserting enterprise process.</div>
+  <div class="rule"><span class="id">R-hub</span>Every state change &rarr; update this Plan Hub. Don't lose track of anything.</div>
+
+  <h3>Technical lessons (M-series)</h3>
+  <div class="lesson"><span class="id">M38</span> <code>transformers</code> must be imported BEFORE numpy/torch on Windows (DLL load order). Otherwise exit 127 silent abort.</div>
+  <div class="lesson"><span class="id">M-jiwer</span> <code>jiwer&lt;3</code> required &mdash; jiwer 3+ breaks <code>truth_transform</code> API used in <code>scripts/eval/metrics.py</code>.</div>
+  <div class="lesson"><span class="id">M-datasets</span> <code>datasets&lt;4</code> required &mdash; 4.x needs torchcodec/ffmpeg.</div>
+  <div class="lesson"><span class="id">M-numpy</span> <code>numpy&lt;2.1</code> required for numba compatibility.</div>
+  <div class="lesson"><span class="id">M-kenlm-prune</span> KenLM <code>--prune</code> flag values are SEPARATE args, not one quoted string. <code>--prune '0 0 1 1 1'</code> silently fails; correct is <code>--prune 0 0 1 1 1</code>.</div>
+  <div class="lesson"><span class="id">M-slam-deepspeed</span> SLAM-LLM <code>checkpoint_handler.py</code> needs deepspeed import wrapped in try/except (CUDA_HOME often absent in containers).</div>
+  <div class="lesson"><span class="id">M-slam-encoder</span> SLAM-LLM <code>encoder.py</code> needs <code>getattr(model_config, "whisper_decode", False)</code> instead of struct access (Hydra struct mode rejects unknown keys).</div>
+  <div class="lesson"><span class="id">M-slam-join</span> SLAM-LLM <code>Join([model])</code> needs <code>hasattr(model, "join_hook")</code> check, fallback <code>nullcontext()</code> for single-GPU non-DDP.</div>
+  <div class="lesson"><span class="id">M-tf-vs-freerun</span> Token-acc under teacher forcing &ne; working ASR. Free-run probe is required to know if audio is actually being used. Phase 1's 0.38 TF token-acc was LLM learning Hebrew bigram stats, not audio routing.</div>
+  <div class="lesson"><span class="id">M-soniox-no-nbest</span> Soniox does NOT expose N-best. L4 correction is "rewrite spans," not "rerank candidates."</div>
+  <div class="lesson"><span class="id">M-soniox-cap</span> Soniox custom-vocabulary <code>context</code> capped at 8,000 tokens (~10K chars).</div>
+  <div class="lesson"><span class="id">M-soniox-conf</span> Soniox word <code>confidence</code> is 0.0&ndash;1.0 but NOT calibrated. Threshold must be empirically tuned on Hebrew before commit.</div>
+  <div class="lesson"><span class="id">M-eu-adequacy</span> EU has Israeli adequacy decision under PPL Amendment 13; US does not. Use <code>api.eu.soniox.com</code> + DPA + patient consent.</div>
+  <div class="lesson"><span class="id">M-aphasiabank</span> AphasiaBank has ZERO Hebrew corpus (verified talkbank.org). We build it.</div>
+  <div class="lesson"><span class="id">M-elevenlabs-he</span> ElevenLabs Scribe v1 Hebrew = 15.2% WER (per elevenlabs.io/speech-to-text/hebrew), NOT 3.1%. The 3.1% number recycled across prior sessions was fabricated through search-result misattribution.</div>
+  <div class="lesson"><span class="id">M-dictalm-3-sizes</span> DictaLM 3.0 line = 1.7B / 12B / 24B only. There is no 7B in 3.0; older 2.0 line had 7B.</div>
+  <div class="lesson"><span class="id">M-chi25-conf</span> CHI '25 study: confidence heatmaps do NOT improve user correction efficiency. Use Linked Evidence (Abridge) pattern instead.</div>
+  <div class="lesson"><span class="id">M-l4-hebrew</span> No published Hebrew empirical evidence that narrow LLM correction improves a 7.5% ASR baseline. Must measure before locking L4 in.</div>
+  <div class="lesson"><span class="id">M-recompute</span> §7e: don't recycle numbers across configs. The 3.1% recycle was the canonical violation.</div>
+</section>
+
+<!-- =================== FINDINGS LIBRARY =================== -->
+<section id="findings">
+  <h2>Findings library</h2>
+  <p>Every artifact in this session, linkable.</p>
+
+  <h3>Research reports (this session)</h3>
+  <ul>
+    <li><a href="research/R1_soniox_l0.md">R1 &mdash; Soniox L0 deep dive</a> &middot; API surface, Hebrew capabilities, BAA, enterprise, EU residency, competitor landscape</li>
+    <li><a href="research/R2_compliance.md">R2 &mdash; Israeli compliance roadmap</a> &middot; PPL Amendment 13 + AMAR/AMIR SaMD + ISO 13485/IEC 62304 + hospital procurement</li>
+    <li><a href="research/R3_slp_partners.md">R3 &mdash; Hebrew SLP ecosystem</a> &middot; TAU/Friedmann, hospitals, validated scales, AphasiaBank Hebrew gap, ISHLA + MoH</li>
+    <li><a href="research/R4_cloud_infra.md">R4 &mdash; Israeli cloud + deployment</a> &middot; AWS il-central-1 vs Azure / Oracle / GCP, sovereign options, cost model, DR, pen-test partners</li>
+    <li><a href="research/R5_trust_mode_ui.md">R5 &mdash; Trust Mode UI patterns</a> &middot; Abridge Linked Evidence, Dragon/DeepScribe/Suki review patterns, CHI '25 confidence study, RTL specifics</li>
+    <li><a href="research/R6_llm_correction.md">R6 &mdash; L4 narrow LLM correction</a> &middot; AlephBERT-punct, DictaLM 3.0 variants, DictaBERT-NER, abbreviation rules, Hebrew evidence gap</li>
+  </ul>
+
+  <h3>Empirical results (Phase 0/1) <span class="badge dropped">local only</span></h3>
+  <p style="font-size:13px; color:var(--text-soft); margin-bottom:8px;">Stored on the project filesystem, not in this hub repo.</p>
+  <ul>
+    <li><code>output/slam_phase0_checkpoints/slam_phase0_20260513_184741/hebrew_smoke_epoch_1_step_400/model.pt</code> &middot; Phase 0 projector-only ckpt (66 MB)</li>
+    <li><code>output/slam_phase1_checkpoints/slam_phase1_20260513_191409/hebrew_phase1_epoch_1_step_9000/model.pt</code> &middot; Phase 1 projector + LoRA r=32 ckpt (90.5 MB)</li>
+    <li><code>output/slam_phase1_eval_results/baseline_n200.json</code> &middot; Whisper-large-v3 FLEURS he_il baseline (WER 32.12%, CER 12.19%, n=200)</li>
+    <li><code>output/slam_phase1_eval_results/smoke_n20_v2.json</code> &middot; SLAM step_9000 free-run WER (614%, degenerate Hebrew loops)</li>
+    <li><code>output/slam_phase1_eval_results/smoke_n20.json</code> &middot; First SLAM eval pass (wrong prompt; produced English output)</li>
+  </ul>
+
+  <h3>Scripts <span class="badge dropped">local only</span></h3>
+  <p style="font-size:13px; color:var(--text-soft); margin-bottom:8px;">Stored in the WhisperMe project tree, not in this hub repo.</p>
+  <ul>
+    <li><code>scripts/slam/prepare_hebrew_data.py</code> &middot; Data prep: HF datasets &rarr; SLAM-LLM JSONL</li>
+    <li><code>scripts/slam/train_slam_hebrew.sh</code> &middot; Phase 0/1 training recipe (Hydra args)</li>
+    <li><code>scripts/slam/eval_wer_fleurs.py</code> &middot; WER eval on FLEURS he_il (loads LoRA + uses real SLAM prompt template)</li>
+    <li><code>scripts/slam/eval_slam_wer.py</code> &middot; Original eval script (missing LoRA load &mdash; superseded by eval_wer_fleurs.py)</li>
+    <li><code>scripts/slam/probe_audio_routing.py</code> &middot; Diagnostic: does the trained model use audio? (Answer: no)</li>
+    <li><code>scripts/cloud/vast_slam_llm_setup.sh</code> &middot; Vast Linux bootstrap (transformers, datasets, jiwer pins, M-lessons codified)</li>
+    <li><code>scripts/eval/evaluate_kenlm_rescore.py</code> &middot; HF Whisper N-best + KenLM + MBR-ChrF (text-only L4 = dead)</li>
+    <li><code>scripts/eval/rescore_with_dictalm.py</code> &middot; DictaLM-1.7B perplexity rescoring (text-only L4 = dead)</li>
+    <li><code>scripts/eval/build_trust_mode_confidence.py</code> &middot; Per-word confidence from Whisper N-best alignment</li>
+    <li><code>scripts/eval/compute_trust_mode_effective_wer.py</code> &middot; Effective WER under user-assistance modes</li>
+    <li><code>scripts/demo/trust_mode_server.py</code> &middot; FastAPI demo (faster-whisper + N-best + per-word confidence)</li>
+    <li><code>output/trust_mode/trust_mode_linked_evidence.html</code> &middot; Live mic + audio playback synced demo</li>
+  </ul>
+
+  <h3>Strategic docs <span class="badge dropped">local only</span></h3>
+  <ul>
+    <li><code>docs/v3.0_research_synthesis.md</code> &middot; SUPERSEDED &mdash; was the SLAM-LLM-from-scratch plan. Kept for historical context.</li>
+    <li><code>docs/L5_architecture_design.md</code> &middot; SUPERSEDED &mdash; the earlier audio-aware adapter design.</li>
+  </ul>
+</section>
+
+<!-- =================== OPEN GAPS =================== -->
+<section id="open-gaps">
+  <h2>Open gaps requiring real-world action</h2>
+  <p>External dependencies that block phases &mdash; not "more research."</p>
+
+  <div class="gap-row">
+    <div class="kind">LAWYER</div>
+    <div>Privacy + medical-device counsel for: SaMD intended-use wording (Class II vs IIa hinges on this), DPO threshold opinion at our scale, Soniox DPA review against PPL Amendment 13 onward-transfer clauses, Israeli Registration Holder contract structure.</div>
+  </div>
+  <div class="gap-row">
+    <div class="kind">CERT BODY</div>
+    <div>CE notified body engagement for IEC 62304 Class B + ISO 13485 (BSI, TÜV SÜD). AMAR accepts reference-country approval &mdash; no Israeli notified body exists.</div>
+  </div>
+  <div class="gap-row">
+    <div class="kind">IRB</div>
+    <div>Helsinki Committee submission for Hebrew aphasia corpus collection (institutional level, MoH form 11). Typical 2&ndash;4 month cycle.</div>
+  </div>
+  <div class="gap-row">
+    <div class="kind">ACADEMIC</div>
+    <div>TAU / Friedmann lab outreach for partnership scoping + clinical Hebrew validation expertise. Public page: en-sagol.tau.ac.il/researchers/Naama-Friedmann.</div>
+  </div>
+  <div class="gap-row">
+    <div class="kind">HOSPITAL</div>
+    <div>Loewenstein, Sheba, Hadassah, Rambam SLP department head names not publicly verified &mdash; need outreach via TAU channel.</div>
+  </div>
+  <div class="gap-row">
+    <div class="kind">PEN-TEST</div>
+    <div>Engage Sygnia or Comsec for 18-month pen-test cycle on health database (PPL Reg. 10 requirement).</div>
+  </div>
+  <div class="gap-row">
+    <div class="kind">MEASURE</div>
+    <div>L4 narrow correction on Hebrew &mdash; mandatory empirical pass before locking architecture. Build held-out Hebrew clinical eval set; measure span-level edit precision vs harm rate.</div>
+  </div>
+  <div class="gap-row">
+    <div class="kind">SONIOX</div>
+    <div>Verify on signup: exact EU datacenter region + sub-processor list, BAA self-serve vs sales path, volume pricing tier, contractual SLA terms. (No "sales call" needed for the API itself &mdash; self-serve.)</div>
+  </div>
+  <div class="gap-row">
+    <div class="kind">DATA</div>
+    <div>Hebrew aphasia corpus collection plan: AphasiaBank protocol (Cinderella retell + 4 picture descriptions + 1 procedural), CHAT transcription, ~50&ndash;200 patients via clinical partners.</div>
+  </div>
+</section>
+
+<footer>
+  Maintained by the project agent. Every state change &mdash; new decision, completed task, new lesson learned &mdash; should be reflected here before responding to the user. If this file is out of sync with the conversation, the conversation is wrong.
+</footer>
+
+</main>
+</body>
+</html>
