@@ -662,7 +662,7 @@
   <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">Dark mode</button>
   <h1>WhisperMe — Plan Hub</h1>
   <p class="sub">A clinical Hebrew speech-language-pathology product. This page is the living plan: what we're building, why, what's done, what's next. Click any card for the full story.</p>
-  <p class="meta">Revision 7 &middot; Architecture v4.0 &middot; STT committed: Soniox EU &middot; <a href="https://idanshav1t.github.io/whisperme-plan-hub/">idanshav1t.github.io/whisperme-plan-hub</a></p>
+  <p class="meta">Revision 8 &middot; Architecture v4.0 &middot; STT committed: Soniox EU &middot; <strong>Prototype empirically validated end-to-end on real Hebrew speech.</strong> &middot; <a href="https://idanshav1t.github.io/whisperme-plan-hub/">idanshav1t.github.io/whisperme-plan-hub</a></p>
   <nav class="toc">
     <a href="#status">Status</a>
     <a href="#architecture">Architecture</a>
@@ -904,6 +904,10 @@
     <div class="lesson-row"><span class="lid">M-chi25</span> CHI '25 study: confidence heatmaps do NOT improve user correction efficiency. Use Linked Evidence.</div>
     <div class="lesson-row"><span class="lid">M-l4-hebrew</span> Zero published Hebrew empirical evidence narrow LLM correction beats baseline. Must measure.</div>
     <div class="lesson-row"><span class="lid">M-recompute</span> §7e: don't recycle numbers across configs. The 3.1% recycle was the canonical violation.</div>
+    <div class="lesson-row"><span class="lid">M-context-shape</span> Soniox <code>context.general</code> is an array of <code>{key, value}</code> metadata objects (not vocabulary). Vocabulary hotwords go in <code>context.terms</code> as an array of strings. <code>translation_terms</code> uses <code>{source, target}</code>. Wrong shape returns HTTP 400 "start request is malformed."</div>
+    <div class="lesson-row"><span class="lid">M-audiocontext-resume</span> Chrome autoplay policy can leave a new <code>AudioContext</code> in <code>suspended</code> state even after a user gesture. Call <code>await ctx.resume()</code> explicitly inside the gesture handler before connecting nodes &mdash; otherwise <code>ScriptProcessor.onaudioprocess</code> never fires and audio silently doesn't flow.</div>
+    <div class="lesson-row"><span class="lid">M-soniox-fragments</span> Soniox streams sub-word fragments (each token is a few characters). Render with <code>display: inline</code> and join with empty string &mdash; never insert whitespace between adjacent tokens or you get the &ldquo;constellation of characters&rdquo; failure mode.</div>
+    <div class="lesson-row"><span class="lid">M-hidden-css</span> Browser default <code>[hidden] { display: none }</code> is overridden by any class selector that sets <code>display</code> (specificity). Add explicit <code>[hidden] { display: none !important }</code> early in the stylesheet to keep <code>.hidden</code> toggles honest.</div>
   </div>
 </section>
 
@@ -1405,7 +1409,7 @@
       <li><span class="cbox">[ ]</span><span class="label">EU project region toggled in Console (<code>api.eu.soniox.com</code>) &mdash; pending verification by user</span></li>
       <li><span class="cbox">[ ]</span><span class="label">DPA countersigned (one-click in Console) &mdash; pending verification by user</span></li>
       <li><span class="cbox">[ ]</span><span class="label">BAA reviewed (Console &rarr; Security &amp; Compliance) &mdash; pending</span></li>
-      <li class="done"><span class="cbox">[done]</span><span class="label">Hebrew streaming integration via real WebSocket &mdash; <code>app/soniox_client.js</code> (mic capture + PCM resample + first config frame + token streaming)</span></li>
+      <li class="done"><span class="cbox">[done]</span><span class="label">Hebrew streaming integration via real WebSocket &mdash; <code>app/soniox_client.js</code> (mic capture + PCM resample + first config frame + token streaming). <strong>Empirically validated:</strong> user spoke real Hebrew into the browser prototype, Soniox returned accurate Hebrew transcription, sub-word fragments concatenated correctly into Hebrew sentences.</span></li>
       <li class="done"><span class="cbox">[done]</span><span class="label">Clinical Hebrew hotword starter list (~120 terms) for Soniox <code>context</code> &mdash; <code>app/hebrew_clinical_hotwords.json</code></span></li>
       <li class="done"><span class="cbox">[done]</span><span class="label">Linked Evidence transcript renderer (click word &rarr; audio plays) &mdash; <code>app/renderer.js</code></span></li>
       <li class="done"><span class="cbox">[done]</span><span class="label">Prefix-lock streaming UX (finalized solid + editable, tentative dim + read-only)</span></li>
