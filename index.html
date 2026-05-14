@@ -316,7 +316,7 @@
 <header class="page-header">
   <h1>WhisperMe — Plan Hub</h1>
   <p class="sub">Clinical Hebrew Speech-Language-Pathology product. Single source of truth for architecture, decisions, phases, rules, and findings.</p>
-  <p class="meta">Revision 1 &middot; Architecture v4.0 (post-SLAM pivot) &middot; STT layer committed: Soniox EU</p>
+  <p class="meta">Revision 2 &middot; Architecture v4.0 (post-SLAM pivot) &middot; STT layer committed: Soniox EU &middot; Live: <a href="https://idanshav1t.github.io/whisperme-plan-hub/">idanshav1t.github.io/whisperme-plan-hub</a></p>
   <nav class="toc">
     <a href="#status">Status</a>
     <a href="#decisions">Decisions</a>
@@ -617,6 +617,7 @@
   <div class="rule"><span class="id">R-brain</span>Apply judgment before asking. Don't ask the user to disambiguate things I can resolve myself.</div>
   <div class="rule"><span class="id">R-self-serve</span>Self-serve APIs do not need "sales calls." Read the docs before inserting enterprise process.</div>
   <div class="rule"><span class="id">R-hub</span>Every state change &rarr; update this Plan Hub. Don't lose track of anything.</div>
+  <div class="rule"><span class="id">R-hub-push</span>After updating <code>plan_hub/index.html</code> or any <code>plan_hub/research/*.md</code>, immediately run <code>git -C plan_hub add -A &amp;&amp; git -C plan_hub commit -m "&hellip;" &amp;&amp; git -C plan_hub push</code>. The hub is the public source of truth at <code>idanshav1t.github.io/whisperme-plan-hub</code> &mdash; the local file and the live site must never drift.</div>
 
   <h3>Technical lessons (M-series)</h3>
   <div class="lesson"><span class="id">M38</span> <code>transformers</code> must be imported BEFORE numpy/torch on Windows (DLL load order). Otherwise exit 127 silent abort.</div>
