@@ -662,7 +662,7 @@
   <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">Dark mode</button>
   <h1>WhisperMe — Plan Hub</h1>
   <p class="sub">A clinical Hebrew speech-language-pathology product. This page is the living plan: what we're building, why, what's done, what's next. Click any card for the full story.</p>
-  <p class="meta">Revision 4 &middot; Architecture v4.0 &middot; STT committed: Soniox EU &middot; <a href="https://idanshav1t.github.io/whisperme-plan-hub/">idanshav1t.github.io/whisperme-plan-hub</a></p>
+  <p class="meta">Revision 5 &middot; Architecture v4.0 &middot; STT committed: Soniox EU &middot; <a href="https://idanshav1t.github.io/whisperme-plan-hub/">idanshav1t.github.io/whisperme-plan-hub</a></p>
   <nav class="toc">
     <a href="#status">Status</a>
     <a href="#architecture">Architecture</a>
@@ -830,7 +830,7 @@
       </div>
       <h3 class="phase-name">Soniox L0 + Trust Mode prototype</h3>
       <p class="phase-blurb">Replace SLAM-from-scratch with Soniox. Build a clinician can-actually-try-it prototype.</p>
-      <div class="phase-progress">2/10 sub-tasks complete</div>
+      <div class="phase-progress">5/10 sub-tasks complete</div>
     </button>
 
     <button class="phase-card" data-modal="phase-3">
@@ -956,6 +956,16 @@
       <div class="fid">A2</div>
       <div class="fname">Hebrew Double-Metaphone phonetic library</div>
       <div class="fdesc"><code>app/hebrew_metaphone.js</code> &mdash; ~210 lines, zero deps, runs in Node + browser. Handles niqqud strip, final-letter normalization, positional ב/פ/ה/ו logic, ק/כ &middot; ת/ט &middot; ס/ש &middot; א/ע conflation. 16/16 self-tests passing.</div>
+    </div>
+    <div class="finding-card" style="cursor:default;">
+      <div class="fid">A3</div>
+      <div class="fname">Mock Soniox response (Hebrew SLP session)</div>
+      <div class="fdesc"><code>app/mock_soniox_response.json</code> &mdash; 33 final tokens + 3 tentative across a 16.8s clinician/patient dialogue. 6 tokens below 0.85 confidence to exercise the dotted underline. Matches real Soniox token schema.</div>
+    </div>
+    <div class="finding-card" style="cursor:default;">
+      <div class="fid">A4</div>
+      <div class="fname">Trust Mode prototype renderer</div>
+      <div class="fdesc"><code>app/index.html</code> + <code>app/styles.css</code> + <code>app/renderer.js</code> &mdash; runnable HTML prototype implementing Linked Evidence (click word &rarr; play), prefix-lock streaming sim, dotted underline for low-confidence, double-tap &rarr; bottom sheet with phonetic suggestions + edit, dark mode, full Hebrew RTL with LTR audio rail. <code>cd app &amp;&amp; python -m http.server 8000</code> to run.</div>
     </div>
   </div>
 </section>
@@ -1382,16 +1392,17 @@
       <li><span class="cbox">[ ]</span><span class="label">BAA reviewed (Console &rarr; Security &amp; Compliance)</span></li>
       <li><span class="cbox">[ ]</span><span class="label">Hebrew streaming integration via WebSocket SDK</span></li>
       <li class="done"><span class="cbox">[done]</span><span class="label">Clinical Hebrew hotword starter list (~120 terms) for Soniox <code>context</code> &mdash; <code>app/hebrew_clinical_hotwords.json</code></span></li>
-      <li><span class="cbox">[ ]</span><span class="label">Linked Evidence transcript renderer (click word &rarr; audio seeks)</span></li>
-      <li><span class="cbox">[ ]</span><span class="label">Prefix-lock streaming UX (finalized solid + editable, tentative dim + read-only)</span></li>
-      <li><span class="cbox">[ ]</span><span class="label">RTL transcript layout with LTR audio controls (bidi isolates)</span></li>
+      <li class="done"><span class="cbox">[done]</span><span class="label">Linked Evidence transcript renderer (click word &rarr; audio plays) &mdash; <code>app/renderer.js</code></span></li>
+      <li class="done"><span class="cbox">[done]</span><span class="label">Prefix-lock streaming UX (finalized solid + editable, tentative dim + read-only)</span></li>
+      <li class="done"><span class="cbox">[done]</span><span class="label">RTL transcript layout with LTR audio controls (bidi isolates)</span></li>
       <li class="done"><span class="cbox">[done]</span><span class="label">Hebrew Double-Metaphone library for "did you mean" suggestions &mdash; <code>app/hebrew_metaphone.js</code> (16/16 tests passing)</span></li>
     </ul>
     <h4>What can begin without blockers</h4>
     <ul>
       <li><strong>Done</strong> &mdash; Hebrew clinical hotword starter list: <code>app/hebrew_clinical_hotwords.json</code></li>
       <li><strong>Done</strong> &mdash; Hebrew Double-Metaphone library: <code>app/hebrew_metaphone.js</code> (16/16 tests passing)</li>
-      <li>Next without blockers: Linked Evidence transcript renderer (HTML + JS, mocked Soniox response shape until real key)</li>
+      <li><strong>Done</strong> &mdash; Linked Evidence transcript renderer with prefix-lock streaming + RTL layout: <code>app/index.html</code> + <code>app/renderer.js</code> + <code>app/styles.css</code> + <code>app/mock_soniox_response.json</code>. Run with <code>cd app &amp;&amp; python -m http.server 8000</code>.</li>
+      <li>Remaining unblocked: refinements + edit-capture-to-backend stub (Phase 5 territory really).</li>
     </ul>
     <h4>What blocks on user action</h4>
     <ul>
