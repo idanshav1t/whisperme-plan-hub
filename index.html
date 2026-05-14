@@ -662,7 +662,7 @@
   <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">Dark mode</button>
   <h1>WhisperMe — Plan Hub</h1>
   <p class="sub">A clinical Hebrew speech-language-pathology product. This page is the living plan: what we're building, why, what's done, what's next. Click any card for the full story.</p>
-  <p class="meta">Revision 3 &middot; Architecture v4.0 &middot; STT committed: Soniox EU &middot; <a href="https://idanshav1t.github.io/whisperme-plan-hub/">idanshav1t.github.io/whisperme-plan-hub</a></p>
+  <p class="meta">Revision 4 &middot; Architecture v4.0 &middot; STT committed: Soniox EU &middot; <a href="https://idanshav1t.github.io/whisperme-plan-hub/">idanshav1t.github.io/whisperme-plan-hub</a></p>
   <nav class="toc">
     <a href="#status">Status</a>
     <a href="#architecture">Architecture</a>
@@ -830,7 +830,7 @@
       </div>
       <h3 class="phase-name">Soniox L0 + Trust Mode prototype</h3>
       <p class="phase-blurb">Replace SLAM-from-scratch with Soniox. Build a clinician can-actually-try-it prototype.</p>
-      <div class="phase-progress">0/10 sub-tasks complete</div>
+      <div class="phase-progress">2/10 sub-tasks complete</div>
     </button>
 
     <button class="phase-card" data-modal="phase-3">
@@ -943,6 +943,20 @@
       <div class="fname">L4 narrow LLM correction</div>
       <div class="fdesc">AlephBERT-punct, DictaLM 3.0 variants, DictaBERT-NER, abbreviation rules, Hebrew evidence gap.</div>
     </a>
+  </div>
+
+  <h3 style="font-size:14px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-soft); margin:24px 0 10px;">Phase 2 prototype artifacts <span class="badge dropped" style="text-transform:uppercase; font-size:9px;">local only</span></h3>
+  <div class="findings-grid">
+    <div class="finding-card" style="cursor:default;">
+      <div class="fid">A1</div>
+      <div class="fname">Hebrew clinical hotword starter list</div>
+      <div class="fdesc"><code>app/hebrew_clinical_hotwords.json</code> &mdash; ~120 curated terms: SLP terminology, neuroanatomy, stroke/neuro conditions, oral-motor, meds, names, assessment scales. Ready to flatten into Soniox <code>context</code> on first API call.</div>
+    </div>
+    <div class="finding-card" style="cursor:default;">
+      <div class="fid">A2</div>
+      <div class="fname">Hebrew Double-Metaphone phonetic library</div>
+      <div class="fdesc"><code>app/hebrew_metaphone.js</code> &mdash; ~210 lines, zero deps, runs in Node + browser. Handles niqqud strip, final-letter normalization, positional ב/פ/ה/ו logic, ק/כ &middot; ת/ט &middot; ס/ש &middot; א/ע conflation. 16/16 self-tests passing.</div>
+    </div>
   </div>
 </section>
 
@@ -1367,17 +1381,17 @@
       <li><span class="cbox">[ ]</span><span class="label">DPA countersigned (one-click in Console)</span></li>
       <li><span class="cbox">[ ]</span><span class="label">BAA reviewed (Console &rarr; Security &amp; Compliance)</span></li>
       <li><span class="cbox">[ ]</span><span class="label">Hebrew streaming integration via WebSocket SDK</span></li>
-      <li><span class="cbox">[ ]</span><span class="label">Clinical Hebrew hotword list (~500 terms) for Soniox <code>context</code></span></li>
+      <li class="done"><span class="cbox">[done]</span><span class="label">Clinical Hebrew hotword starter list (~120 terms) for Soniox <code>context</code> &mdash; <code>app/hebrew_clinical_hotwords.json</code></span></li>
       <li><span class="cbox">[ ]</span><span class="label">Linked Evidence transcript renderer (click word &rarr; audio seeks)</span></li>
       <li><span class="cbox">[ ]</span><span class="label">Prefix-lock streaming UX (finalized solid + editable, tentative dim + read-only)</span></li>
       <li><span class="cbox">[ ]</span><span class="label">RTL transcript layout with LTR audio controls (bidi isolates)</span></li>
-      <li><span class="cbox">[ ]</span><span class="label">Hebrew Double-Metaphone library for "did you mean" suggestions</span></li>
+      <li class="done"><span class="cbox">[done]</span><span class="label">Hebrew Double-Metaphone library for "did you mean" suggestions &mdash; <code>app/hebrew_metaphone.js</code> (16/16 tests passing)</span></li>
     </ul>
     <h4>What can begin without blockers</h4>
     <ul>
-      <li>Hebrew clinical hotword list assembly (public sources: anatomy, drug names, common Hebrew patient/clinician names)</li>
-      <li>Hebrew Double-Metaphone library (~200 lines of JS/Python, no external deps)</li>
-      <li>Prototype scaffold (HTML + JS, mocked Soniox response shape until real key)</li>
+      <li><strong>Done</strong> &mdash; Hebrew clinical hotword starter list: <code>app/hebrew_clinical_hotwords.json</code></li>
+      <li><strong>Done</strong> &mdash; Hebrew Double-Metaphone library: <code>app/hebrew_metaphone.js</code> (16/16 tests passing)</li>
+      <li>Next without blockers: Linked Evidence transcript renderer (HTML + JS, mocked Soniox response shape until real key)</li>
     </ul>
     <h4>What blocks on user action</h4>
     <ul>
