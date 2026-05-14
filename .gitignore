@@ -5,3 +5,12 @@ Thumbs.db
 *.swp
 *~
 node_modules/
+
+# Defensive: never commit secrets or local configs to the public hub repo
+.env
+.env.*
+!.env.example
+config.local.*
+*.key
+*.secret
+secrets/
