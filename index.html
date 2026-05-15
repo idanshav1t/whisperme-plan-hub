@@ -662,7 +662,7 @@
   <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">Dark mode</button>
   <h1>WhisperMe — Plan Hub</h1>
   <p class="sub">A clinical Hebrew speech-language-pathology product. This page is the living plan: what we're building, why, what's done, what's next. Click any card for the full story.</p>
-  <p class="meta">Revision 11 &middot; Architecture v4.0 &middot; STT committed: Soniox EU &middot; <strong>PCM&rarr;WAV playback (sample-accurate); word-grouped click-to-play; revision history captured for L4.</strong> &middot; <a href="https://idanshav1t.github.io/whisperme-plan-hub/">idanshav1t.github.io/whisperme-plan-hub</a></p>
+  <p class="meta">Revision 12 &middot; Architecture v4.0 &middot; STT committed: Soniox EU &middot; <strong>3-agent code review pass: O(n&sup2; ) render fixed, ~60 lines dead code removed, listener leak fixed, mislabels corrected.</strong> &middot; <a href="https://idanshav1t.github.io/whisperme-plan-hub/">idanshav1t.github.io/whisperme-plan-hub</a></p>
   <nav class="toc">
     <a href="#status">Status</a>
     <a href="#architecture">Architecture</a>
@@ -912,6 +912,9 @@
     <div class="lesson-row"><span class="lid">M-parallel-recorder</span> Run a <code>MediaRecorder</code> in parallel with the PCM <code>ScriptProcessor</code> off the same <code>MediaStream</code>. Both taps are non-destructive (one for Soniox streaming, one for local playback). Blob comes back on <code>mediaRecorder.stop()</code> via Promise; wire it into the <code>&lt;audio&gt;</code> element's <code>src</code>. Click-word now seeks the real recording (true Linked Evidence), not TTS.</div>
     <div class="lesson-row"><span class="lid">M-word-grouping</span> Sub-word Soniox fragments are too short to play back individually (60&ndash;150ms each &mdash; sounds mid-syllable). Click-to-play must operate on WORDS not fragments. Word boundaries derive from: whitespace at token start/end, or punctuation. Visual fragment-level cues (low-conf underline, edit highlight) stay per-token; the interaction unit is the word.</div>
     <div class="lesson-row"><span class="lid">M-pcm-wav-playback</span> Do NOT use <code>MediaRecorder</code> (Opus/WebM) for the playback recording in a Linked-Evidence interface. Variable bitrate + keyframe quantization makes audio seek imprecise by ±60&ndash;120ms; plus MediaRecorder start-time vs. PCM stream start-time drift accumulates over long recordings. CORRECT: accumulate the same Int16 PCM frames you're already sending to Soniox, assemble into a 44-byte-header WAV blob on stop. WAV is uncompressed, seek is sample-accurate, byte stream is identical to what Soniox timed against. Trade-off: ~10&times; the file size of Opus &mdash; acceptable for prototype; chunked upload to Israeli-region S3 replaces in-memory buffer for long sessions.</div>
+    <div class="lesson-row"><span class="lid">M-render-coalesce</span> In a streaming-token UI, never call a full <code>render()</code> per token. Soniox emits many tokens/sec (final + rolling tentative); rebuilding the whole transcript <code>innerHTML</code> each time is O(n) per token = O(n&sup2; ) over a session — a 20-min clinical recording (3&ndash;5k tokens) visibly stutters. Fix: a dirty-flag + <code>requestAnimationFrame</code> coalescer so bursts collapse to one render per frame. Pair with a single delegated click listener on the container instead of re-binding per-span listeners every render.</div>
+    <div class="lesson-row"><span class="lid">M-audio-listener-leak</span> A <code>timeupdate</code> listener on a shared <code>&lt;audio&gt;</code> element leaks if it's only removed on the natural end-of-clip path. The <code>play()</code>-rejected path and rapid re-clicks bypass that removal, stacking listeners that fire ~4&times;/sec forever. Fix: track the current listener in a module var, remove it authoritatively in one <code>clearPlaying()</code> entered by EVERY exit path (end, reject, re-click, stop).</div>
+    <div class="lesson-row"><span class="lid">M-honest-labels</span> §1 grounding applies to UI/doc labels too. The phonetic encoder was repeatedly called "Hebrew Double-Metaphone" in the UI + hub while the file's own docstring said it is NOT a true Double-Metaphone (no primary/alternate split). Corrected everywhere to "Hebrew phonetic-neighbor encoder (homophone-conflating)". Don't borrow an established algorithm's name for a simplified approximation.</div>
   </div>
 </section>
 
@@ -962,7 +965,7 @@
     </div>
     <div class="finding-card" style="cursor:default;">
       <div class="fid">A2</div>
-      <div class="fname">Hebrew Double-Metaphone phonetic library</div>
+      <div class="fname">Hebrew phonetic-neighbor library</div>
       <div class="fdesc"><code>app/hebrew_metaphone.js</code> &mdash; ~210 lines, zero deps, runs in Node + browser. Handles niqqud strip, final-letter normalization, positional ב/פ/ה/ו logic, ק/כ &middot; ת/ט &middot; ס/ש &middot; א/ע conflation. 16/16 self-tests passing.</div>
     </div>
     <div class="finding-card" style="cursor:default;">
@@ -1110,7 +1113,7 @@
       <li><strong>Click any word</strong> &rarr; audio seeks to that word and plays 2-second pre-roll</li>
       <li><strong>Streaming UX</strong> &rarr; finalized words rendered solid + editable; tentative (not-yet-final) words rendered at 60% opacity + READ-ONLY ("prefix-lock" pattern). Prevents lost edits when the recognizer revises.</li>
       <li><strong>Low-confidence cue</strong> &rarr; subtle dotted underline only. No color heatmap.</li>
-      <li><strong>Double-tap a word</strong> &rarr; bottom sheet appears with: play just this word, phonetic suggestions (Hebrew Double-Metaphone), LLM rewrite-in-context, or free text edit.</li>
+      <li><strong>Double-tap a word</strong> &rarr; bottom sheet appears with: play just this word, phonetic suggestions (Hebrew homophone-conflating encoder), LLM rewrite-in-context, or free text edit.</li>
       <li><strong>Annotation</strong> &rarr; select a range &rarr; highlight in one of 4 clinical colors (phonology, syntax, pragmatics, fluency) or attach a threaded note. Annotations anchor to word IDs + timestamps so they survive transcript re-edits.</li>
       <li><strong>Edit-capture loop</strong> &rarr; every accepted correction logs <code>{audio_span, original, corrected}</code> after on-device PHI scrub. Opt-in default-off for clinical compliance.</li>
     </ul>
@@ -1405,7 +1408,7 @@
       <li>Hebrew transcript renders right-to-left with finalized + tentative word states (prefix-lock)</li>
       <li>Clicking any word seeks audio playback to that timestamp</li>
       <li>Clinical Hebrew hotwords are pushed via Soniox <code>context</code> field</li>
-      <li>Hebrew Double-Metaphone library for "did you mean" suggestions</li>
+      <li>Hebrew phonetic-neighbor library for "did you mean" suggestions</li>
     </ul>
     <h4>Sub-tasks</h4>
     <ul class="checklist">
@@ -1418,12 +1421,12 @@
       <li class="done"><span class="cbox">[done]</span><span class="label">Linked Evidence transcript renderer (click word &rarr; audio plays) &mdash; <code>app/renderer.js</code></span></li>
       <li class="done"><span class="cbox">[done]</span><span class="label">Prefix-lock streaming UX (finalized solid + editable, tentative dim + read-only)</span></li>
       <li class="done"><span class="cbox">[done]</span><span class="label">RTL transcript layout with LTR audio controls (bidi isolates)</span></li>
-      <li class="done"><span class="cbox">[done]</span><span class="label">Hebrew Double-Metaphone library for "did you mean" suggestions &mdash; <code>app/hebrew_metaphone.js</code> (16/16 tests passing)</span></li>
+      <li class="done"><span class="cbox">[done]</span><span class="label">Hebrew phonetic-neighbor library for "did you mean" suggestions &mdash; <code>app/hebrew_metaphone.js</code> (16/16 tests passing; simplified single-code encoder, not a true Double-Metaphone)</span></li>
     </ul>
     <h4>What can begin without blockers</h4>
     <ul>
       <li><strong>Done</strong> &mdash; Hebrew clinical hotword starter list: <code>app/hebrew_clinical_hotwords.json</code></li>
-      <li><strong>Done</strong> &mdash; Hebrew Double-Metaphone library: <code>app/hebrew_metaphone.js</code> (16/16 tests passing)</li>
+      <li><strong>Done</strong> &mdash; Hebrew phonetic-neighbor library: <code>app/hebrew_metaphone.js</code> (16/16 tests passing)</li>
       <li><strong>Done</strong> &mdash; Linked Evidence transcript renderer with prefix-lock streaming + RTL layout: <code>app/index.html</code> + <code>app/renderer.js</code> + <code>app/styles.css</code> + <code>app/mock_soniox_response.json</code>. Run with <code>cd app &amp;&amp; python -m http.server 8000</code>.</li>
       <li>Remaining unblocked: refinements + edit-capture-to-backend stub (Phase 5 territory really).</li>
     </ul>
